@@ -6,7 +6,7 @@ import day3_binary_diagnostic as d3bd
 
 
 def oxygen_rate(bin_l, s0, s1):
-    # 每行数据的位数 如：001001100101 12位
+    # 001001100101 12bits
     ind = 12
     for i in range(ind):
         ret = [b[i] for b in bin_l for i in range(len(b))]
