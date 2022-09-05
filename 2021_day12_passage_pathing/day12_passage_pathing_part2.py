@@ -1,6 +1,6 @@
 """
-Day 12: Passage Pathing
-https://adventofcode.com/2021/day/12
+Day 12: Passage Pathing,Part Two
+https://adventofcode.com/2021/day/12#part2
 """
 
 
@@ -37,6 +37,8 @@ def paths(data_path):
                 if cave.lower() == cave:
                     nsc.add(cave)
                 temp.append((cave, nsc, t2))
+            elif (cave in sc) and (t2 is None) and (cave not in ['start', 'end']):
+                temp.append((cave, sc, cave))
     print(n)
 
 
@@ -44,4 +46,4 @@ if __name__ == '__main__':
     # paths('test10')
     # paths('test19')
     # paths('test226')
-    paths('data_day12')  # 4885
+    paths('data_day12')  # 117095
