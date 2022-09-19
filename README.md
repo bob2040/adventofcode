@@ -1,6 +1,8 @@
 # adventofcode
 
-The program of 2021 Day14 part2 is done,but it is not an ideal program,which consums much memory and time.I am thinking of another way to implement it. 09/25/2022
+2021 Day14 part2 has been improved,but it still took a long time to run,thinking...... 09/19/2022
+
+The program of 2021 Day14 part2 is done,but it is not an ideal program,which consums much memory and time.I am thinking of another way to implement it. 09/15/2022
 
 I'm still working on 2021 Day 12,complicated one to me. 08/29/2022
 
