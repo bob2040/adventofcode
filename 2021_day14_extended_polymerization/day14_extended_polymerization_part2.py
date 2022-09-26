@@ -1,9 +1,8 @@
 """
-Day 14: Extended Polymerization
-https://adventofcode.com/2021/day/14
+Day 14: Extended Polymerization,Part Two
+https://adventofcode.com/2021/day/14#part2
 """
 import time
-from itertools import chain
 from collections import Counter
 
 def get_diff(data_path):
@@ -14,26 +13,30 @@ def get_diff(data_path):
     # print(temp)
     rule = dict([s.split(' -> ') for s in con if '->' in s])
     # print(rule)
-    n = 0
-    while n < 40:
-        new_t = []
-        for i in range(len(temp)-1):
-            te = tuple(temp[i:i + 2])
-            r = rule[te[0]+te[1]]
-            new_t.append(r)
-        # print(new_t)
-        last = temp[len(temp)-1]
-        temp = list(chain.from_iterable(zip(temp, new_t)))
-        temp.append(last)
-        print(n)
-        n += 1
-    # print(temp)
-    quantity = [temp.count(s) for s in set(temp)]
-    print(max(quantity) - min(quantity))
+
+    q = Counter()
+    for i in range(len(temp)-1):
+        q[temp[i]+temp[i+1]] += 1
+
+    diff = 0
+    for j in range(41):
+        q0 = Counter()
+        q1 = Counter()
+        for k, v in q.items():
+            q0[k[0]] += v
+            q1[k[0] + rule[k]] += v
+            q1[rule[k] + k[1]] += v
+        q = q1
+        q0[temp[-1]] += 1
+        # print(q0)
+        d = dict(q0).values()
+        diff = max(d) - min(d)
+    print(diff)
 
 
 if __name__ == '__main__':
     start = time.time()
     # get_diff('test')  #
-    get_diff('data_day14')  #
-    print(time.time()-start)
+    get_diff('data_day14')  # 2875665202438
+    print(time.time()-start)  # 0.0050008296966552734
+
