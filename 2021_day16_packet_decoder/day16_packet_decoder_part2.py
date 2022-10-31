@@ -2,6 +2,7 @@
 Day 16: Packet Decoder,Part Two
 https://adventofcode.com/2021/day/16#part2
 """
+import functools
 
 
 def get_result(data_path):
@@ -71,74 +72,80 @@ def get_result(data_path):
                 op_list.append(bin4_to_dec[s_bin_data[i + 7 + j:i + 11 + j]])
                 i += 6+j+5
                 # print('i', i)
-    # print(op_list)
-    while True:
-        i = 0
-        if len(op_list) == 1:
-            break
-        while True:
-            if i > len(op_list) - 1 or i+1 > len(op_list) - 1:
-                break
-            if isinstance(op_list[i], str) and isinstance(op_list[i+1], int):
-                if op_list[i] == '+':
-                    sum = 0
-                    while True:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        sum += op_list.pop(i+1)
-                    op_list[i] = sum
-                    # print(sum)
-                    # print(op_list)
-                if op_list[i] == '*':
-                    mul = 1
-                    while True:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        mul *= op_list.pop(i+1)
-                    op_list[i] = mul
-                if op_list[i] == 'min':
-                    temp = []
-                    while True:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        temp.append(op_list.pop(i+1))
-                    op_list[i] = min(temp)
-                if op_list[i] == 'max':
-                    temp = []
-                    while True:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        temp.append(op_list.pop(i+1))
-                    op_list[i] = max(temp)
-                if op_list[i] == '<':
-                    temp = []
-                    k = 0
-                    while k < 2:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        temp.append(op_list.pop(i+1))
-                        k += 1
-                    op_list[i] = 1 if temp[0] < temp[1] else 0
-                if op_list[i] == '>':
-                    temp = []
-                    k = 0
-                    while k < 2:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        temp.append(op_list.pop(i+1))
-                        k += 1
-                    op_list[i] = 1 if temp[0] > temp[1] else 0
-                if op_list[i] == '==':
-                    temp = []
-                    k = 0
-                    while k < 2:
-                        if i+1 > len(op_list)-1 or isinstance(op_list[i+1], str):
-                            break
-                        temp.append(op_list.pop(i+1))
-                        k += 1
-                    op_list[i] = 1 if temp[0] == temp[1] else 0
-                print(op_list)
-            i += 1
+    print(op_list)
+    temp = []
+    mp = []
+    while isinstance(op_list[0], str):
+        # print('1',temp)
+        if isinstance(op_list[-1], int):
+            temp.append(op_list.pop())
+        # elif isinstance(op_list[-1], str):
+        #     if op_list[-1] == '+':
+        #         op_list.pop()
+        #         x = sum(mp)
+        #         mp = []
+        #         mp.append(x)
+        #     elif op_list[-1] == '*':
+        #         op_list.pop()
+        #         x = functools.reduce(lambda s1, s2: s1*s2, mp)
+        #         mp = []
+        #         mp.append(x)
+        else:
+            if op_list[-1] == '+':
+                mp.append(sum(temp))
+                op_list.pop()
+                temp = []
+            elif op_list[-1] == '*':
+                mp.append(functools.reduce(lambda s1, s2: s1*s2, temp))
+                op_list.pop()
+                temp = []
+            elif op_list[-1] == 'min':
+                mp.append(min(temp))
+                op_list.pop()
+                temp = []
+            elif op_list[-1] == 'max':
+                mp.append(max(temp))
+                op_list.pop()
+                temp = []
+            elif op_list[-1] == '<':
+                op_list.pop()
+                # print('2',temp)
+                while len(temp) > 1:
+                    if temp.pop() < temp[-1]:
+                        temp[-1] = 1
+                    else:
+                        temp[-1] = 0
+                mp.append(temp[-1])
+                # temp.reverse()
+                # print('3',temp)
+                # op_list += temp
+                temp = []
+                # print('4',temp)
+            elif op_list[-1] == '>':
+                op_list.pop()
+                while len(temp) > 1:
+                    if temp.pop() > temp[-1]:
+                        temp[-1] = 1
+                    else:
+                        temp[-1] = 0
+                mp.append(temp[-1])
+                # temp.reverse()
+                # op_list += temp
+                temp = []
+            elif op_list[-1] == '==':
+                op_list.pop()
+                while len(temp) > 1:
+                    if temp.pop() == temp[-1]:
+                        temp[-1] = 1
+                    else:
+                        temp[-1] = 0
+                mp.append(temp[-1])
+                # temp.reverse()
+                # op_list += temp
+                temp = []
+            # break
+        print(op_list)
+        print(mp)
 
 
 if __name__ == '__main__':
