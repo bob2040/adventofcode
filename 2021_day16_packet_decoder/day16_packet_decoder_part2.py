@@ -2,159 +2,65 @@
 Day 16: Packet Decoder,Part Two
 https://adventofcode.com/2021/day/16#part2
 """
-import functools
 
 
 def get_result(data_path):
-    s_data = open(data_path).read()
-    # print(s_data)
-    hex_to_bin = {'0': '0000', '1': '0001', '2': '0010', '3': '0011',
-                  '4': '0100', '5': '0101', '6': '0110', '7': '0111',
-                  '8': '1000', '9': '1001', 'A': '1010', 'B': '1011',
-                  'C': '1100', 'D': '1101', 'E': '1110', 'F': '1111'}
-    bin_to_dec = {'000': 0, '001': 1, '010': 2, '011': 3, '100': 4, '101': 5, '110': 6, '111': 7}
-    bin4_to_dec = {'0000': 0, '0001': 1, '0010': 2, '0011': 3,
-                   '0100': 4, '0101': 5, '0110': 6, '0111': 7,
-                   '1000': 8, '1001': 9, '1010': 10, '1011': 11,
-                   '1100': 12, '1101': 13, '1110': 14, '1111': 15}
-    s_bin_data = ''
-    for s in s_data:
-        s_bin_data += hex_to_bin[s]
-    # print(s_bin_data)
-    i = 0
-    # version = 0
-    op_list = []
-    while True:
-        if i > len(s_bin_data) - 1 or i+3 > len(s_bin_data) - 1 \
-                or i+6 > len(s_bin_data) - 1 or s_bin_data[i:i+3] not in bin_to_dec.keys():
-            break
-        # print(s_bin_data[i:i+3])
-        # version += bin_to_dec[s_bin_data[i:i+3]]
-        # print(version)
-        type_id = s_bin_data[i+3:i+6]
-        # print(type_id)
-        if type_id != '100':
-            # +
-            if type_id == '000':
-                op_list.append('+')
-            # *
-            if type_id == '001':
-                op_list.append('*')
-            # min
-            if type_id == '010':
-                op_list.append('min')
-            # max
-            if type_id == '011':
-                op_list.append('max')
-            # >
-            if type_id == '101':
-                op_list.append('>')
-            # <
-            if type_id == '110':
-                op_list.append('<')
-            # ==
-            if type_id == '111':
-                op_list.append('==')
+    data = open(data_path).read().strip()
+    binary = bin(int(data, 16))[2:]
+    while len(binary) < 4*len(data):
+        binary = '0'+binary
+    value, next_i = parse(binary, 0, 0)
+    print(value)
 
-            if s_bin_data[i+6] == '0':
-                i += 3+3+1+15
-            elif s_bin_data[i+6] == '1':
-                i += 3+3+1+11
-        elif type_id == '100':
-            if s_bin_data[i + 6] == '0':
-                op_list.append(bin4_to_dec[s_bin_data[i+7:i+11]])
-                i += 3+3+1+4
-            else:
-                j = 0
-                while s_bin_data[i+6+j] == '1':
-                    op_list.append(bin4_to_dec[s_bin_data[i + 7+j:i + 11+j]])
-                    j += 5
-                op_list.append(bin4_to_dec[s_bin_data[i + 7 + j:i + 11 + j]])
-                i += 6+j+5
-                # print('i', i)
-    print(op_list)
-    temp = []
-    mp = []
-    while isinstance(op_list[0], str):
-        # print('1',temp)
-        if isinstance(op_list[-1], int):
-            temp.append(op_list.pop())
-        # elif isinstance(op_list[-1], str):
-        #     if op_list[-1] == '+':
-        #         op_list.pop()
-        #         x = sum(mp)
-        #         mp = []
-        #         mp.append(x)
-        #     elif op_list[-1] == '*':
-        #         op_list.pop()
-        #         x = functools.reduce(lambda s1, s2: s1*s2, mp)
-        #         mp = []
-        #         mp.append(x)
+
+def parse(bits, i, indent):
+    type_ = int(bits[i+3:i+6], 2)
+    if type_ == 4:
+        i += 6
+        v = 0
+        while True:
+            v = v*16 + int(bits[i+1:i+5], 2)
+            i += 5
+            if bits[i-5] == '0':
+                return v, i
+    else:
+        len_id = int(bits[i+6], 2)
+        vs = []
+        if len_id == 0:
+            len_bits = int(bits[i+7:i+7+15], 2)
+            start_i = i+7+15
+            i = start_i
+            while True:
+                v, next_i = parse(bits, i, indent+1)
+                vs.append(v)
+                i = next_i
+                if next_i - start_i == len_bits:
+                    break
         else:
-            if op_list[-1] == '+':
-                mp.append(sum(temp))
-                op_list.pop()
-                temp = []
-            elif op_list[-1] == '*':
-                mp.append(functools.reduce(lambda s1, s2: s1*s2, temp))
-                op_list.pop()
-                temp = []
-            elif op_list[-1] == 'min':
-                mp.append(min(temp))
-                op_list.pop()
-                temp = []
-            elif op_list[-1] == 'max':
-                mp.append(max(temp))
-                op_list.pop()
-                temp = []
-            elif op_list[-1] == '<':
-                op_list.pop()
-                # print('2',temp)
-                while len(temp) > 1:
-                    if temp.pop() < temp[-1]:
-                        temp[-1] = 1
-                    else:
-                        temp[-1] = 0
-                mp.append(temp[-1])
-                # temp.reverse()
-                # print('3',temp)
-                # op_list += temp
-                temp = []
-                # print('4',temp)
-            elif op_list[-1] == '>':
-                op_list.pop()
-                while len(temp) > 1:
-                    if temp.pop() > temp[-1]:
-                        temp[-1] = 1
-                    else:
-                        temp[-1] = 0
-                mp.append(temp[-1])
-                # temp.reverse()
-                # op_list += temp
-                temp = []
-            elif op_list[-1] == '==':
-                op_list.pop()
-                while len(temp) > 1:
-                    if temp.pop() == temp[-1]:
-                        temp[-1] = 1
-                    else:
-                        temp[-1] = 0
-                mp.append(temp[-1])
-                # temp.reverse()
-                # op_list += temp
-                temp = []
-            # break
-        print(op_list)
-        print(mp)
+            n_packets = int(bits[i+7:i+7+11], 2)
+            i += 7+11
+            for t in range(n_packets):
+                v, next_i = parse(bits, i, indent+1)
+                vs.append(v)
+                i = next_i
+        if type_ == 0:
+            return sum(vs), i
+        elif type_ == 1:
+            ans = 1
+            for v in vs:
+                ans *= v
+            return ans, i
+        elif type_ == 2:
+            return min(vs), i
+        elif type_ == 3:
+            return max(vs), i
+        elif type_ == 5:
+            return (1 if vs[0] > vs[1] else 0), i
+        elif type_ == 6:
+            return (1 if vs[0] < vs[1] else 0), i
+        elif type_ == 7:
+            return (1 if vs[0] == vs[1] else 0), i
 
 
 if __name__ == '__main__':
-    # get_result('test2_3')  # 110 000 1 00000000010 110 100 00001 010 100 00010 1+2=3
-    # get_result('test2_54')  # 000 001 0 000000000010110 101 100 00110 011 100 01001 0000 6*9=54
-    # get_result('test2_7')  # 100 010 0 000000000100001 101 100 00111 110 100 01000 000 100 01001 0 7,8,9 min=7
-    # get_result('test2_9')  # 110 011 1 00000000011 000 100 00111 101 100 01000 000 100 01001 00000 7,8,9 max=9
-    # get_result('test2_1_less_than')  # 110 110 0 000000000010110 101 100 00101 010 100 01111 0000 5,15 5<15,1
-    # get_result('test2_0_greater_than')  # 111 101 1 00000000010 111 100 00101 101 100 01111 5,15 5<15,0
-    # get_result('test2_0_equal_to')  # 100 111 0 000000000010110 101 100 00101 111 100 01111 0000 5,15 5 != 15,0
-    # get_result('test2_1_1+3_2x2')  # 100 111 0 000000001010000 010 000 1 00000000010 010 100 00001 100 100 00011 110 001 1 00000000010 000 100 00010 010 100 00010 00 1,3,2,2 1+3=2+2
-    get_result('data_day16')  #
+    get_result('data_day16')  # 12301926782560
