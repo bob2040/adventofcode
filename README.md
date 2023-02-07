@@ -1,4 +1,5 @@
 # adventofcode
+test
 
 2021 Day15 part1 is ok with test data,but not okay with input data,still working on it.
 
